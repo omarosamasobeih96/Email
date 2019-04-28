@@ -27,31 +27,27 @@ def encryptDES_ECB(data, key):
     d = k.encrypt(data)
     return d
 
-def BruteForce(plain_text , cipher):
-    key = 0
-    while(1):
-        #print(key)
-        if encryptDES_ECB(plain_text , key.to_bytes(8 , byteorder = "big")) == cipher:
-            return key
-        key+=1
+
+def prepare(key):
+    pos = 1
+    res = 0
+    for i in range(48):
+        if key & (1<<i):
+            res |= (1<<pos)
+        pos += 1
+        if pos % 8 == 7:
+            pos+=2
+    return res
+
 
 def BruteForce(plain_text , cipher):
     key = 0
     while(1):
         #print(key)
-        if encryptDES_ECB(plain_text , key.to_bytes(8 , byteorder = "big")) == cipher:
-            return key
+        k = prepare(key)
+        if encryptDES_ECB(plain_text ,k.to_bytes(8 , byteorder = "big")) == cipher:
+            return k
         key += 1
-        lg = 0
-        tmp = key & -key
-        ad = tmp
-        while tmp != 0:
-            lg += 1
-            tmp >>= 1
-        if lg % 8 == 1:
-            key += ad
-        elif lg % 8 == 7:
-            key += ad
 
 
 def Test():
@@ -82,21 +78,34 @@ def Test():
 
 Test()
 
-# time before
-   #     0.4737281799316406
-   #     3.955752372741699
-   #     9.826350688934326
-   #     20.399290084838867
-   #     35.76552224159241
-   #     38.219075441360474
-   #     77.8673906326294
-   #     171.32871985435486
-   #     6532.375683069229
-
-# time after
-    #    0.07695460319519043
-    #    1.7450017929077148
-    #    6.495294570922852
-    #    19.631728887557983
-    #    47.742640018463135
-    #    117.39371752738953
+# magdy's
+   #     0.02798295021057129
+   #     4
+   #     4
+   #     1.012420654296875
+   #     616
+   #     616
+   #     2.3386592864990234
+   #     1658
+   #     1658
+   #     4.468438625335693
+   #     3660
+   #     3660
+   #     6.0695202350616455
+   #     3702
+   #     3702
+   #     10.828471899032593
+   #     7710
+   #     7710
+   #     30.609933137893677
+   #     22028
+   #     22028
+   #     82.71259450912476
+   #     156798
+   #     156798
+   #     140.8682668209076
+   #     396348
+   #     396348
+   #     239.89950823783875
+   #     664610
+   #     664610
