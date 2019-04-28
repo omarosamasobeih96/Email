@@ -42,16 +42,16 @@ def BruteForce(plain_text , cipher):
         if encryptDES_ECB(plain_text , key.to_bytes(8 , byteorder = "big")) == cipher:
             return key
         key += 1
-        if key & (key - 1):
-            lg = 0
-            tmp = key
-            while tmp != 0:
-                lg += 1
-                tmp >>= 1
-            if lg % 8 == 1:
-                key *= 2
-            elif lg % 8 == 7:
-                key *= 2
+        lg = 0
+        tmp = key & -key
+        ad = tmp
+        while tmp != 0:
+            lg += 1
+            tmp >>= 1
+        if lg % 8 == 1:
+            key += ad
+        elif lg % 8 == 7:
+            key += ad
 
 
 def Test():
