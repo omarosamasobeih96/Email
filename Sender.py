@@ -1,7 +1,12 @@
 import random
 import pyDes
 import math
-receiver_rsa_public_key = {'e': 65537, 'n': 120622100426517990505120548700308202513}
+import json
+
+key_file = open("SharedFiles/public.json")
+key_file_string = json.load(key_file)
+
+receiver_rsa_public_key = key_file_string['receiver']
 def power(base, exp, mod):
     ans = 1
     base %= mod
@@ -13,7 +18,7 @@ def power(base, exp, mod):
     return ans
 
 def encryptRSA(plain_text, key):
-    return power(plain_text, key['e'], key['n'])
+    return power(plain_text, int(key['e']), int(key['n']))
 
 def generateSessionKey(len):
     session_key = 0
@@ -37,9 +42,7 @@ def encryptDES_ECB(data, key):
     return d
 
 def generateMessage(mail , session_key):
-    print(session_key)
     e = encryptRSA(session_key, receiver_rsa_public_key)
-    print(e)
     encrypted_session_key = e.to_bytes(16 , byteorder = "big")
     encrypted_mail  = encryptDES_ECB(mail , session_key.to_bytes(8 , byteorder = "big"))
     return  encrypted_session_key + encrypted_mail
