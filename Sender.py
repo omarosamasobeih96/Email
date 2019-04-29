@@ -2,6 +2,7 @@ import random
 import pyDes
 import math
 import json
+import smtplib, ssl
 
 key_file = open("SharedFiles/public.json")
 key_file_string = json.load(key_file)
@@ -47,7 +48,32 @@ def generateMessage(mail , session_key):
     encrypted_mail  = encryptDES_ECB(mail , session_key.to_bytes(8 , byteorder = "big"))
     return  encrypted_session_key + encrypted_mail
 
-session_key = generateSessionKey(48)
-mail = input()
+def sendMail(body):
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"
+    sender_email = "minamego001@gmail.com"  # Enter your address
+    receiver_email = "mina.karam96@eng-st.cu.edu.eg"  # Enter receiver address
+    password = input("Type your mail password and press enter: ")
+    message = """\
+    Subject: Hi there
 
-print(generateMessage(mail, session_key))
+
+    """ + body
+    #print(message)
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
+        print("Mail Sent ^^")
+
+
+session_key = generateSessionKey(48)
+mail = input("Please enter your message: ")
+
+
+encryptedMessage = generateMessage(mail, session_key)
+l = len(encryptedMessage) 
+intConv = int.from_bytes(encryptedMessage, byteorder='big', signed=False)
+mailBody = str(l) + '+' + str(intConv)
+#print(encryptedMessage)
+sendMail(mailBody)
