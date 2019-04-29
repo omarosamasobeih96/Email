@@ -1,10 +1,46 @@
 import pyDes
 import json
+import smtplib
+import time
+import imaplib
+import email
+import re
 
 key_file = open("SharedFiles/receiver.json")
 key_file_string = json.load(key_file)
 
 receiver_rsa_private_key = key_file_string['receiver']
+
+
+def receiveMail():
+    receiver_email = "mina.karam96@eng-st.cu.edu.eg"    
+    password = input("Type your mail password and press enter: ")
+    mail = imaplib.IMAP4_SSL("imap.gmail.com")
+    mail.login(receiver_email,password)
+    mail.select('inbox')
+
+    type, data = mail.search(None, 'ALL')
+    mail_ids = data[0]
+
+    id_list = mail_ids.split()   
+    first_email_id = int(id_list[0])
+    latest_email_id = int(id_list[-1])
+
+    message = ""
+    for i in range(latest_email_id,first_email_id, -1):
+        typ, data =  mail.fetch(str(i), "(RFC822)")
+
+        for response_part in data:
+            if isinstance(response_part, tuple):
+                msg = email.message_from_string(response_part[1].decode())
+                message = msg.get_payload(decode=True)
+                break
+        break
+    #print(message)
+    groups = re.findall('[0-9]+' , str(message))
+
+    return int(groups[1]).to_bytes(int(groups[0]) , byteorder = "big")
+
 
 def power(base, exp, mod):
     ans = 1
@@ -31,8 +67,7 @@ def retrieveMessage(data):
     session_key = session_key.to_bytes(8 , byteorder = "big")
 
     mail = data[16:]
-    return decryptDES_ECB(mail, session_key)
+    return decryptDES_ECB(mail, session_key).decode("utf-8") 
 
-data = b'K\xa1\xb4\x9d\x0b(\x05\xdcE\xcc!d\x036X\x89\xa778/\xdd\t\x9eY\x8e[x\x02\x87\xaa\x9f\xed'
-
-print(retrieveMessage(data))
+receivedMessage = receiveMail()
+print(retrieveMessage(receivedMessage))
