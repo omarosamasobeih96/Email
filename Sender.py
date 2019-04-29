@@ -48,7 +48,10 @@ def generateMessage(mail , session_key):
     encrypted_mail  = encryptDES_ECB(mail , session_key.to_bytes(8 , byteorder = "big"))
     return  encrypted_session_key + encrypted_mail
 
-def sendMail(body):
+def sendMail(encryptedMessage):
+    l = len(encryptedMessage) 
+    intConv = int.from_bytes(encryptedMessage, byteorder='big', signed=False)
+    body = str(l) + '+' + str(intConv)
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
     sender_email = "minamego001@gmail.com"  # Enter your address
@@ -69,11 +72,5 @@ def sendMail(body):
 
 session_key = generateSessionKey(48)
 mail = input("Please enter your message: ")
-
-
 encryptedMessage = generateMessage(mail, session_key)
-l = len(encryptedMessage) 
-intConv = int.from_bytes(encryptedMessage, byteorder='big', signed=False)
-mailBody = str(l) + '+' + str(intConv)
-#print(encryptedMessage)
-sendMail(mailBody)
+sendMail(encryptedMessage)
